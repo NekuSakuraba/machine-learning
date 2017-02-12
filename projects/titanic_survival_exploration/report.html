@@ -13128,7 +13128,7 @@ Fill in the missing code below so that the function will make this prediction.<b
     
     <span class="n">predictions</span> <span class="o">=</span> <span class="n">predictions_1</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">passenger</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">passenger</span><span class="o">.</span><span class="n">Sex</span><span class="o">==</span><span class="s1">&#39;male&#39;</span> <span class="ow">and</span> <span class="n">passenger</span><span class="o">.</span><span class="n">Age</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">passenger</span><span class="o">.</span><span class="n">Sex</span><span class="o">==</span><span class="s1">&#39;male&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">passenger</span><span class="o">.</span><span class="n">Age</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">):</span>
             <span class="n">predictions</span><span class="p">[</span><span class="n">_</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
     
     <span class="c1"># Return our predictions</span>
@@ -13620,7 +13620,7 @@ Make sure to keep track of the various features and conditions you tried before 
     
     <span class="n">predictions</span> <span class="o">=</span> <span class="n">predictions_2</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">passenger</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">passenger</span><span class="o">.</span><span class="n">Pclass</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">passenger</span><span class="o">.</span><span class="n">SibSp</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">passenger</span><span class="o">.</span><span class="n">Pclass</span> <span class="o">==</span> <span class="mi">3</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">passenger</span><span class="o">.</span><span class="n">SibSp</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">):</span>
             <span class="n">predictions</span><span class="p">[</span><span class="n">_</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="n">passenger</span><span class="o">.</span><span class="n">Fare</span> <span class="o">&gt;</span> <span class="mi">300</span><span class="p">:</span>
             <span class="n">predictions</span><span class="p">[</span><span class="n">_</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
@@ -13697,22 +13697,22 @@ Make sure to keep track of the various features and conditions you tried before 
 <p>The following feature that I took a look was the <strong>SibSp</strong>. <br />
 I combined this feature with previous one. The first condition I asked was if <strong>SibSp</strong> was greater than zero. It didn't change at all. So, I increased that number to one. Now the rate of death of that specific class increased. So I ran the prediction increasing the number and the max accuracy reached was 82.04%, when <strong>SibSp</strong> was greater than 2.</p>
 
-<pre><code>if passenger.Pclass == 3 and passenger.SibSp &gt; 2:
+<pre><code>if (passenger.Pclass == 3) and (passenger.SibSp &gt; 2):
     predictions[_] = 0</code></pre>
 <p>The next feature I took a look was the <strong>Parch</strong> <br />
 I did the same thing. I tried to ask if <strong>Parch</strong> was greater than zero and then I tried greater than one. <br />
 The plot had the same behavior. So, I tried it in the prediction code combined with the <strong>SibSp</strong> and <strong>Pclass</strong>, but it decreased the accuracy to 79.35%.</p>
 
-<pre><code>if passenger.Pclass == 3 and passenger.SibSp &gt; 2 and passenger.Parch &gt; 2:
+<pre><code>if (passenger.Pclass == 3) and (passenger.SibSp &gt; 2) and (passenger.Parch &gt; 2):
     predictions[_] = 0</code></pre>
 <p>And then I tried it just with <strong>Pclass</strong>. The accuracy was 79.91%. <br />
 It had the same behavior when I tried it with <strong>Pclass</strong> alone.</p>
 
-<pre><code>if passenger.Pclass == 3 and passenger.Parch &gt; 2:
+<pre><code>if (passenger.Pclass == 3) and (passenger.Parch &gt; 2):
         predictions[_] = 0</code></pre>
 <p>The next feature I looked was the <strong>fare</strong>. When I ploted the histogram, I noticed that people who paid a grater value had a high rate of survivability. So I tried to figure out from which value had a low rate of survivability. I tried the <strong>fare</strong> smaller than 60 and it ploted that people who paid a value lower than 40 had low chances. So I ran the feature in the prediction with the following condition, but It decreased the accuracy to 71.16%.</p>
 
-<pre><code>if passenger.Pclass == 3 and passenger.SibSp &gt; 2:
+<pre><code>if (passenger.Pclass == 3) and (passenger.SibSp &gt; 2):
     predictions[_] = 0
 if passenger.Fare &lt; 40:
     predictions[_] = 0</code></pre>
@@ -13722,20 +13722,20 @@ People who embarked in Southampton had a high rate of death. So I combined with 
 <pre><code>['Fare &lt; 40', 'Pclass == 3', 'SibSp &gt; 2']</code></pre>
 <p>The graph showed that everyone who embarked with this condition in Queenstown deceased. And most of people that embarked in Southampton deceased. It improved the accuracy to 81.37%, but it wasn't the greatest value.</p>
 
-<pre><code>if passenger.Pclass == 3 and passenger.SibSp &gt; 2 and passenger.Fare &lt; 40 \
+<pre><code>if (passenger.Pclass == 3) and (passenger.SibSp &gt; 2) and (passenger.Fare &lt; 40) \
     and (passenger.Embarked == 'Q' or passenger.Embarked == 'S'):
     predictions[_] = 0</code></pre>
 <p>I tried to look at fare again. People who paid an expensive fare survived. So I tried the prediction function again. <br />
 The new accuracy improved again to 82.15%.</p>
 
-<pre><code>if passenger.Pclass == 3 and passenger.SibSp &gt; 1 and passenger.Fare &lt; 60 \
+<pre><code>if (passenger.Pclass == 3) and (passenger.SibSp &gt; 1) and (passenger.Fare &lt; 60) \
     and (passenger.Embarked == 'Q' or passenger.Embarked == 'S'):
     predictions[_] = 0
 if passenger.Fare &gt; 300:
     predictions[_] = 1</code></pre>
 <p>Finally I noticed that it was the highest accuracy at the moment. So I tried to combine the two conditions with the highest accuracy and again it improved to 82.27%</p>
 
-<pre><code>if passenger.Pclass == 3 and passenger.SibSp &gt; 2:
+<pre><code>if (passenger.Pclass == 3) and (passenger.SibSp &gt; 2):
     predictions[_] = 0
 if passenger.Fare &gt; 300:
     predictions[_] = 1</code></pre>
