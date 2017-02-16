@@ -14903,9 +14903,10 @@ YwKKJT5jjDEBxRKfMcaYgGKJzxhjTECxxGeMMSag/H+l3rA3DwPxAwAAAABJRU5ErkJggg==
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p><strong>Answer:</strong></p>
-<p>It's a technique that search for the optimal parameters that better performs on a learning algorithm.</p>
-<p>Without the grid search, we would be guessing the best parameters and it would take much long time. <br />
-So, with the grid search we could automate this task saving a lot of time.</p>
+<p>It's a brute-force exaustive technique for searching the optimal parameters that better performs on a learning algorithm.
+These parameters must be inputed beforehand and the algorithm will try every combination and will evaluate each of them.</p>
+<p>Trying every combination is computing cost expensive. So if the dataset is huge, the algorithm could take much long time to run.</p>
+<p>An alternative of this technique is Randomized Search that each setting is sampled from a distribution over possible parameter values. So, by doing this way the run do not depends on the number of parameters and possible values and adding parameters that do not influence the performance does not decrease efficiency.</p>
 
 </div>
 </div>
@@ -14927,10 +14928,10 @@ So, with the grid search we could automate this task saving a lot of time.</p>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p><strong>Answer:</strong></p>
-<p>This technique splits the dataset into k folds with equals size. <br />
-And for each k iterations, we will use one fold as testing set and the remaining folds as training set. At end of the process we take an average of all test results.</p>
-<p>This technique maximize the potencial of both testing and training sets increasing the accuracy of the learner.
-So, combined with grid search, k-fold could indicate which of the parameters has the best performance.</p>
+<p>This technique consists in spliting the dataset into k equals size folds. <br />
+And for each k iterations, we will use one fold as testing set and the remaining folds as training set. At end of the process we take an average of all test results giving us an estimate of performance of the model. <br />
+By doing this way, each data point of the set will unique for each training and testing set. Therefore the estimate is a reliable one.</p>
+<p>So, combined with grid search, we can find out which hyperparamer better performs generalizing the dataset by varying the hyperparameters.</p>
 
 </div>
 </div>
@@ -14943,6 +14944,8 @@ So, combined with grid search, k-fold could indicate which of the parameters has
 <p>For the questions 7 and 8, I used this source:</p>
 <ul>
 <li><a href="https://www.youtube.com/watch?v=Gol_qOgRqfA">https://www.youtube.com/watch?v=Gol_qOgRqfA</a></li>
+<li><a href="http://scikit-learn.org/stable/modules/grid_search.html#randomized-parameter-search">http://scikit-learn.org/stable/modules/grid_search.html#randomized-parameter-search</a></li>
+<li>Chapter 6 of the book Python Machine Learning</li>
 </ul>
 
 </div>
