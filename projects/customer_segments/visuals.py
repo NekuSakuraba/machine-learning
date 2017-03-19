@@ -79,6 +79,10 @@ def cluster_results(reduced_data, preds, centers, pca_samples):
 	ax.scatter(x = pca_samples[:,0], y = pca_samples[:,1], \
 	           s = 150, linewidth = 4, color = 'black', marker = 'x');
 
+	# Display sample points
+	for i, ev in enumerate(pca_samples):
+		ax.text(ev[0]+.125, ev[1], "Sample %d"%i)
+    
 	# Set plot title
 	ax.set_title("Cluster Learning on PCA-Reduced Data - Centroids Marked by Number\nTransformed Sample Data Marked by Black Cross");
 
