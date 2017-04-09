@@ -157,6 +157,7 @@ def plot_trials(csv):
 	ax.plot(actions['trial'], actions['major'], color='orange', label='Major Violation', linewidth=2)
 	ax.plot(actions['trial'], actions['minor_acc'], color='red', label='Minor Accident', linestyle='dashed')
 	ax.plot(actions['trial'], actions['major_acc'], color='red', label='Major Accident', linewidth=2)
+	ax.plot(actions['trial'], actions['major_acc']+actions['minor_acc'], color='blue', label='Total Accidents', linewidth=1)
 	
 	ax.legend(loc='upper right', fancybox=True, fontsize=10)
 
