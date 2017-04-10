@@ -52,13 +52,8 @@ class LearningAgent(Agent):
         waypoint = self.planner.next_waypoint() # The next waypoint
         inputs = self.env.sense(self)           # Visual input - intersection light and traffic
         deadline = self.env.get_deadline(self)  # Remaining deadline
-        print '> %s - %s' % (inputs, waypoint)
 
-        ########### 
-        ## TO DO ##
-        ###########
-        # Set 'state' as a tuple of relevant data for the agent        
-        state = None
+        state = (waypoint, inputs['oncoming'], inputs['left'], inputs['light'])
 
         return state
 
@@ -97,7 +92,7 @@ class LearningAgent(Agent):
         # Set the agent state and default action
         self.state = state
         self.next_waypoint = self.planner.next_waypoint()
-        action = self.next_waypoint#self.valid_actions[ np.random.randint(9999999) % 4 ]
+        action = self.valid_actions[ np.random.randint(9999999) % 4 ]
 
         ########### 
         ## TO DO ##
