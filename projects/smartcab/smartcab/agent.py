@@ -23,7 +23,7 @@ class LearningAgent(Agent):
         ## TO DO ##
         ###########
         # Set any additional class parameters as needed
-
+        self.trial = 0
 
     def reset(self, destination=None, testing=False):
         """ The reset function is called at the beginning of each trial.
@@ -32,8 +32,24 @@ class LearningAgent(Agent):
 
         # Select the destination as the new location to route to
         self.planner.route_to(destination)
-        
-        self.epsilon -= .05
+
+        # First decay function
+        # self.epsilon -= .05
+
+        # Second decay function
+        self.epsilon = math.cos(0.05 * self.trial)
+
+        # Third decay function
+        #self.epsilon = math.e ** (-self.alpha * self.trial)
+
+        # Forth decay function
+        #self.trial += 1
+        #self.epsilon = 1. / self.trial**2
+
+        # Fifth decay functino
+        #self.epsilon = self.alpha ** self.trial
+        self.trial += 1
+
         if testing:
             self.epsilon = .0
             self.alpha = .0
@@ -145,7 +161,7 @@ def run():
     #   learning   - set to True to force the driving agent to use Q-learning
     #    * epsilon - continuous value for the exploration factor, default is 1
     #    * alpha   - continuous value for the learning rate, default is 0.5
-    agent = env.create_agent(LearningAgent,learning = True)
+    agent = env.create_agent(LearningAgent,learning = True, alpha=.6)
     
     ##############
     # Follow the driving agent
@@ -161,14 +177,14 @@ def run():
     #   display      - set to False to disable the GUI if PyGame is enabled
     #   log_metrics  - set to True to log trial and simulation results to /logs
     #   optimized    - set to True to change the default log file name
-    sim = Simulator(env, update_delay=0.01, log_metrics=True, display=False)
+    sim = Simulator(env, update_delay=0.01, log_metrics=True, display=False, optimized=True)
     
     ##############
     # Run the simulator
     # Flags:
     #   tolerance  - epsilon tolerance before beginning testing, default is 0.05 
     #   n_test     - discrete number of testing trials to perform, default is 0
-    sim.run(n_test=10)
+    sim.run(n_test=20)
 
 
 if __name__ == '__main__':
