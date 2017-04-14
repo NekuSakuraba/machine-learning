@@ -109,10 +109,21 @@ class LearningAgent(Agent):
             if self.epsilon > random.random():
                 action = self.valid_actions[random.randint(0, 999999999) % 4]
             else:
-                action = max(self.Q[state], key=lambda k: self.Q[state][k])
- 
+                actions = list()
+                for k, v in zip(self.Q[state].iterkeys(), self.Q[state].itervalues()):
+                    if any([v > actions[a] for a in actions]):
+                        # for any value greater, we initialize again the array
+                        actions = list()
+                        actions.append(k)
+                    elif any([v == actions[a] for a in actions]) or not actions:
+                        # for any value equals to the max value, we add to the array
+                        actions.append(k)
+                    else:
+                        # lower values are ignored
+                        continue
+                num_actions = len(actions)
+                action = actions[random.randint(0, 999999999) % num_actions]
         return action
-
 
     def learn(self, state, action, reward):
         """ The learn function is called after the agent completes an action and
@@ -127,7 +138,8 @@ class LearningAgent(Agent):
         print self.Q[state]
         if self.learning:
             #self.Q[state][action] = (1-self.alpha) * self.Q[state][action] + self.alpha * (reward + self.get_maxQ(state))
-            self.Q[state][action] += self.alpha * (reward + self.get_maxQ(state) - self.Q[state][action])
+            #self.Q[state][action] += self.alpha * (reward + self.get_maxQ(state) - self.Q[state][action])
+            self.Q[state][action] += self.alpha * (reward - self.Q[state][action])
             print self.Q[state]
 
         return
