@@ -34,7 +34,7 @@ class LearningAgent(Agent):
         self.planner.route_to(destination)
 
         # First decay function
-        # self.epsilon -= .05
+        #self.epsilon -= .05
         # self.epsilon -= 0.0033333333333333335
 
         # Second decay function
@@ -109,13 +109,13 @@ class LearningAgent(Agent):
             if self.epsilon > random.random():
                 action = self.valid_actions[random.randint(0, 999999999) % 4]
             else:
-                actions = list()
+                actions = []
                 for k, v in zip(self.Q[state].iterkeys(), self.Q[state].itervalues()):
-                    if any([v > actions[a] for a in actions]):
+                    if any([v > self.Q[state][a] for a in actions]):
                         # for any value greater, we initialize again the array
-                        actions = list()
+                        actions = []
                         actions.append(k)
-                    elif any([v == actions[a] for a in actions]) or not actions:
+                    elif any([v == self.Q[state][a] for a in actions]) or not actions:
                         # for any value equals to the max value, we add to the array
                         actions.append(k)
                     else:
@@ -182,7 +182,6 @@ def run():
     # Flags:
     #   enforce_deadline - set to True to enforce a deadline metric
     env.set_primary_agent(agent, True)
-    #env.set_primary_agent(agent)
 
     ##############
     # Create the simulation
