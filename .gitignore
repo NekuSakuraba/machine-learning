@@ -66,3 +66,8 @@ target/
 
 # Pycharm files
 .idea/
+
+# Files of image classification
+*.p
+*.tar.gz
+cifar-10-batches-py/
