@@ -71,3 +71,4 @@ target/
 *.p
 *.tar.gz
 cifar-10-batches-py/
+*.csv
