@@ -107,17 +107,18 @@ class MultivariateTMixture:
     ----------
     n_components: number of components
     """
-    def __init__(self, n_components):
+    def __init__(self, n_components, random_state):
         self.n_components = n_components
+        self.random_state = random_state
     
     def fit(self, X):
         self.p = X.shape[1]
         
-        clf = KMeans(n_clusters=self.n_components)
+        clf = KMeans(n_clusters=self.n_components, random_state=self.random_state)
         clf.fit(X)
         
-        xmin = get_random(X)
-        xmax = get_random(X)
+        #xmin = get_random(X)
+        #xmax = get_random(X)
         xcov = np.cov(X.T.copy())
         self.mixes = [multivariate_t(mu=clf.cluster_centers_[_], sigma=xcov, df=4) for _ in range(self.n_components)]
         self.pi    = [1./self.n_components for _ in range(self.n_components)]
