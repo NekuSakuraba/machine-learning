@@ -127,8 +127,8 @@ class MultivariateTMixture:
         # precision cholesky
         self.precisions_chol = self._compute_precision_cholesky(sigmas)
 
-        mahalanobis = self._compute_mahalanobis(X)
-        u = self._compute_u(mahalanobis)
+        # mahalanobis = self._compute_mahalanobis(X)
+        # u = self._compute_u(mahalanobis)
 
         self.lower_bound = -np.inf
 

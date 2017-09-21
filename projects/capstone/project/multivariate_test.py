@@ -1,49 +1,32 @@
-import pandas as pd
-# For undersampling
-from imblearn.under_sampling import RandomUnderSampler
-from multivariate_util import *
-# helping to remove outliers
-from scipy.stats import iqr
+import numpy as np
+from multivariate_util import multivariate_t_rvs
+from multivariate_t_mixture import MultivariateTMixture
 
-feats = ['V15', 'V18', 'V11', 'V13', 'V8', 'Class']
+mu  = [0, 0]
+cov = np.eye(2)
+X1 = multivariate_t_rvs(mu, cov, 4, 350)
 
-df = pd.read_csv('./creditcard.csv')
-df = df[feats]
+mu  = [5, 5]
+cov = np.eye(2) * .5
+X2 = multivariate_t_rvs(mu, cov, 19, 350)
 
-# separating the predictors and the labels
-X, y = df.iloc[:,:-1], df.iloc[:,-1]
+mu  = [-5, -5]
+cov = np.eye(2) * 2
+X3 = multivariate_t_rvs(mu, cov, 7.5, 350)
 
-legit, fraud = X[df.Class==0].copy(), X[df.Class==1].copy()
+# X = np.concatenate([X1, X2, X3])
+# t = MultivariateTMixture(3, max_iter=100)
 
-for idx, feat in enumerate(legit.columns):
-    q75, q25 = np.percentile(legit[feat], [75, 25])
-    iqr_ = iqr(legit[feat]) * 1.5
+X = np.concatenate([X1, X2])
+t = MultivariateTMixture(2, max_iter=100)
 
-    greater = np.array(legit[feat] <= q25 - iqr_, dtype=bool)
-    legit.loc[greater, feat] = np.nan
+t.fit(X)
 
-    lower = np.array(legit[feat] >= q75 + iqr_, dtype=bool)
-    legit.loc[lower, feat] = np.nan
-legit = pd.concat([legit, fraud], axis=0)
-legit = pd.concat([legit, y], axis=1)
-legit = legit.dropna()
-# checking if there is a missing value
-print legit.isnull().sum()
-print '\n\n'
+print t.means
+print t.sigmas
+print t.df
 
-# separating the predictors and the labels
-X, y = legit.iloc[:,:-1], legit.iloc[:,-1]
-
-rus = RandomUnderSampler(ratio={0:246*60, 1:246}, random_state=0, return_indices=True)
-X_resampled, y_resampled, idxes = rus.fit_sample(X, y)
-
-t_clf = MultivariateTMixture(n_components=4, random_state=0)
-t_clf.fit(X_resampled)
-
-t_clf.iterate(X_resampled)
-t_clf.iterate(X_resampled)
-t_clf.iterate(X_resampled)
-t_clf.iterate(X_resampled)
-t_clf.iterate(X_resampled)
-
-print 'finished'
+import matplotlib.pyplot as plt
+arr = range(len(t.likelihood))
+plt.scatter(arr, t.likelihood)
+plt.show()
