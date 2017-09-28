@@ -69,7 +69,7 @@ class MultivariateTMixture:
         return n, mu, covariances
 
     def _compute_q1(self, tau):
-        return tau * ln(self.pi) # normalized pi
+        return tau * ln(self.pi/self.n_samples) # normalized pi
 
     def _compute_q2(self, tau, u):
         q2 = np.empty(tau.shape)
@@ -123,8 +123,7 @@ class MultivariateTMixture:
 
         tau, u = self._initialize_parameters(X)
 
-        n, means, covariances = self._estimate_parameters(X, tau, u)
-        self.pi = n/self.n_samples # normalizing
+        self.pi, means, covariances = self._estimate_parameters(X, tau, u)
 
         # precision cholesky
         self.precisions_chol = _compute_precision_cholesky(covariances)
@@ -140,7 +139,7 @@ class MultivariateTMixture:
         for _ in range(self.max_iter):
             prev_lower_bound = self.lower_bound
 
-            log_resp, u = self._e_step_1(X, tau)
+            log_resp, u = self._e_step_1(X)
             tau = np.exp(log_resp)
 
             self._cm_step_1(X, tau, u)
@@ -156,7 +155,7 @@ class MultivariateTMixture:
                 print 'done with #{} iterations'.format(_)
                 break
 
-    def _e_step_1(self, X, tau):
+    def _e_step_1(self, X):
         """ E-step 01 - It calculates the loglikelihood under the current parameters
             and estimates the parameters tau and u.
 
@@ -181,7 +180,7 @@ class MultivariateTMixture:
         half_p  = n_features * .5
         weighted_log = gammaln(half_df+half_p) - gammaln(half_df) \
                        -(half_df + half_p)*(ln(self.df + log_prob) - ln(self.df)) \
-                       -half_p*ln(np.pi * self.df) + log_det + ln(tau.sum(axis=0))
+                       -half_p*ln(np.pi * self.df) + log_det + ln(self.pi)
         # TODO Verificar se o tau precisa ser normalizado
 
         log_prob_norm = logsumexp(weighted_log, axis=1)[:, np.newaxis]
@@ -195,8 +194,7 @@ class MultivariateTMixture:
     def _cm_step_1(self, X, tau, u):
         n_samples, _ = X.shape
 
-        n, self.means, self.covariances = self._estimate_parameters(X, tau, u)
-        self.pi = n/n_samples  # normalizing
+        self.pi, self.means, self.covariances = self._estimate_parameters(X, tau, u)
 
         self.precisions_chol = _compute_precision_cholesky(self.covariances)
 
@@ -233,3 +231,16 @@ class MultivariateTMixture:
 
     def _compute_log_det(self):
         return np.sum(ln(self.precisions_chol.reshape(self.n_components, -1)[:, ::self.n_features + 1]), axis=1)
+
+    def score_samples(self, X):
+        n_components, n_features = self.n_components, self.n_features
+
+        log_det  = self._compute_log_det()
+        log_prob = self._compute_mahalanobis(X)
+
+        half_df = self.df * .5
+        half_p  = n_features * .5
+        weighted_log = gammaln(half_df+half_p) - gammaln(half_df) \
+                       -(half_df + half_p)*(ln(self.df + log_prob) - ln(self.df)) \
+                       -half_p*ln(np.pi * self.df) + log_det + ln(self.pi)
+        return logsumexp(weighted_log, axis=1)
