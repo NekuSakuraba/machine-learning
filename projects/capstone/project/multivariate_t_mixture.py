@@ -7,6 +7,9 @@ from scipy.linalg import cholesky, solve_triangular, LinAlgError
 from scipy.special import gammaln, digamma, logsumexp
 
 def _compute_precision_cholesky(covariances):
+    """
+    Computer the precision cholesky in order to keep the positive definite covariance matrix.
+    """
     n_components, n_features, _ = covariances.shape
 
     precisions_chol = np.empty((n_components, n_features, n_features))
@@ -19,6 +22,18 @@ def _compute_precision_cholesky(covariances):
     return precisions_chol
 
 class MultivariateTMixture:
+    """
+    This algorithm is proposed by Peel D., McLachlan G. J.: Robust Mixture modelling using the t distribution.
+    It implement a ECM (Expectation Conditional Maximization) using a Multivariate t Mixture model.
+    
+    The whole function happens on the fit method and the steps are:
+    1. Initializing the parameters;
+    2. E-step  01;
+    3. CM-step 01;
+    4. E-step  02;
+    5. CM-step 01;
+    6. Repeat steps 2-5 util convergence.
+    """
     def __init__(self, n_components=1, max_iter=100, random_state=None, reg_covar=1e-6, tol=1e-3):
         self.n_components = n_components
         self.random_state = random_state
@@ -29,6 +44,9 @@ class MultivariateTMixture:
         self.tol = tol
 
     def _initialize_parameters(self, X):
+        """
+        Initialize the parameters u and tau (used to estimate the means, covariances and the degrees of freedom). 
+        """
         n_components = self.n_components
 
         # initializng u
@@ -42,6 +60,9 @@ class MultivariateTMixture:
         return tau, u
 
     def _estimate_covariances(self, X, means, n, tau, u):
+        """
+        Estimate the covariance matrix.
+        """
         n_components, n_features = means.shape
         covariances = np.empty((n_components, n_features, n_features))
         for k in range(n_components):
@@ -53,14 +74,7 @@ class MultivariateTMixture:
 
     def _estimate_parameters(self, X, tau, u):
         """
-
-        Returns
-        -------
-        pi :
-
-        means :
-
-        covariances :
+        Estimate the means and the covariance matrix of the model.
         """
         n = tau.sum(0)  # pi without normalizing
         mu = np.dot(tau.T * u.T, X) / np.sum(tau * u, 0)[:, np.newaxis]
@@ -69,15 +83,24 @@ class MultivariateTMixture:
         return n, mu, covariances
 
     def _compute_q1(self, tau):
+        """
+        Helper function used to compute the likelihood of the model.
+        """
         return tau * ln(self.pi/self.n_samples) # normalized pi
 
     def _compute_q2(self, tau, u):
+        """
+        Helper function used to compute the likelihood of the model.
+        """
         q2 = np.empty(tau.shape)
         for k in range(self.n_components):
             q2[:, k] = tau[:, k] * self._compute_q2_helper(u[:, k], self.df[k])
         return q2
 
     def _compute_q2_helper(self, u, df):
+        """
+        Helper function used to compute the likelihood of the model.
+        """
         half_df   = df * .5
         half_feat = self.n_features * .5
 
@@ -86,7 +109,9 @@ class MultivariateTMixture:
                             + np.sum(ln(u) - u))
 
     def _compute_q3(self, tau, u, mahalanobis):
-        # log_det_chol = np.sum(ln(self.precisions_chol.reshape(self.n_components, -1)[:, ::self.n_features + 1]), axis=1)
+        """
+        Helper function used to compute the likelihood of the model.
+        """
         log_det = self._compute_log_det()
 
         log_prob = mahalanobis * u
@@ -94,6 +119,10 @@ class MultivariateTMixture:
         return q3 * tau
 
     def _compute_log_likelihood(self, X, tau, u):
+        """
+        Compute the likelihood of the model.
+        The likelihood is given by the equation 23 (Robust Mixture modelling using the t distribution).
+        """
         q1 = self._compute_q1(tau)
         q2 = self._compute_q2(tau, u)
 
@@ -107,6 +136,9 @@ class MultivariateTMixture:
         return np.mean(log_norm_prob)
 
     def _compute_mahalanobis(self, X):
+        """
+        Compute the mahalanobis distance of the dataset.
+        """
         n_samples, _ = X.shape
 
         mahalanobis = np.empty((n_samples, self.n_components))
@@ -116,9 +148,23 @@ class MultivariateTMixture:
         return mahalanobis
 
     def _compute_u(self, mahalanobis):
+        """
+        Parameter used to estimate the means, covariance matrix and the degrees of freedom.
+        """
         return (self.df + self.n_features) / (mahalanobis + self.df)
 
     def fit(self, X):
+        """
+        Estimates the parameters of the model. The steps are:
+        
+        1. Initializing the parameters;
+        2. E-step  01;
+        3. CM-step 01;
+        4. E-step  02;
+        5. CM-step 01;
+        6. Repeat steps 2-5 util convergence.
+        
+        """
         self.n_samples, self.n_features = X.shape
 
         tau, u = self._initialize_parameters(X)
@@ -156,18 +202,10 @@ class MultivariateTMixture:
                 break
 
     def _e_step_1(self, X):
-        """ E-step 01 - It calculates the loglikelihood under the current parameters
-            and estimates the parameters tau and u.
-
-        Parameters
-        ----------
-        X : array-like, shape(n_components, n_features)
-
-        Returns
-        -------
-        tau : array-like, shape(n_samples, n_components)
-
-        u   : array-like, shape(n_samples, n_components)
+        """ E-step 01 - It calculates the loglikelihood responsability under the current parameters
+            and calculate the u parameter.
+            The loglikelihood is given by the equation 16 and
+            the u parameter is given by the equation 20 (Robust Mixture modelling using the t distribution).
         """
         # E-step 01
         n_components, n_features = self.n_components, self.n_features
@@ -192,6 +230,9 @@ class MultivariateTMixture:
         return log_resp, u
 
     def _cm_step_1(self, X, tau, u):
+        """
+        Estimate the means and covariance matrices of the model.
+        """
         n_samples, _ = X.shape
 
         self.pi, self.means, self.covariances = self._estimate_parameters(X, tau, u)
@@ -199,12 +240,20 @@ class MultivariateTMixture:
         self.precisions_chol = _compute_precision_cholesky(self.covariances)
 
     def _e_step_2(self, X):
+        """
+        Compute the u parameter.
+        The u parameter is used to estimate the means, covariance matrix and the degrees of freedom.
+        """
         # computing the mahalanobis distance
         # with the parameters from cm_step_1
         mahalanobis = self._compute_mahalanobis(X)
         return self._compute_u(mahalanobis)
 
     def _cm_step_2(self, tau, u):
+        """
+        Iteratively estimate the degrees of freedom.
+        The solution is given by the equation 32 (Robust Mixture modelling using the t distribution).
+        """
         n = tau.sum(axis=0)
         tau_u = np.sum(tau * (np.log(u) - u), axis=0)
 
@@ -230,9 +279,15 @@ class MultivariateTMixture:
         self.df = df
 
     def _compute_log_det(self):
+        """
+        Compute the log of determinant of the covariance matrix.
+        """
         return np.sum(ln(self.precisions_chol.reshape(self.n_components, -1)[:, ::self.n_features + 1]), axis=1)
 
     def score_samples(self, X):
+        """
+        Compute the weighted log likelihood of the sample data.
+        """
         n_components, n_features = self.n_components, self.n_features
 
         log_det  = self._compute_log_det()
